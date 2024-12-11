@@ -1,0 +1,136 @@
+import pandas as pd
+import numpy as np
+import tensorflow as tf
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import classification_report, confusion_matrix
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Loading all CSV files and assigning correct, incorrect labels
+data1 = pd.read_csv('chintobreast_correct.csv')
+data1['label'] = 1  # Correct position
+
+data2 = pd.read_csv('chintobreast_correctposition.csv')
+data2['label'] = 1  # Correct position
+
+data3 = pd.read_csv('incorrect_nochin1.csv')
+data3['label'] = 0  # Incorrect position
+
+data4 = pd.read_csv('incorrect_tiltaway.csv')
+data4['label'] = 0  # Incorrect position
+
+data5 = pd.read_csv('incorrect_tilttowards.csv')
+data5['label'] = 0  # Incorrect position
+
+data6 = pd.read_csv('incorrect_nochin2.csv')
+data6['label'] = 0  # Incorrect position
+
+data7 = pd.read_csv('correctchin.csv')
+data7['label'] = 0  # Correct position
+
+data8 = pd.read_csv('correctchintobreast.csv')
+data8['label'] = 0  # Correct position
+
+data9 = pd.read_csv('incorrecttilitright.csv')
+data9['label'] = 1  # Incorrect position
+
+data10 = pd.read_csv('incorrecttiltleft.csv')
+data10['label'] = 1  # Incorrect position
+
+data11 = pd.read_csv('incorrectnochin.csv')
+data11['label'] = 1  # Incorrect position
+
+# Combining all the data into one DataFrame
+data = pd.concat([data1, data2, data3, data4, data5, data6, data7, data8, data9, data10, data11], ignore_index=True)
+
+# Converting 'roll', 'pitch', and 'flex' columns to numeric
+data['roll'] = pd.to_numeric(data['roll'], errors='coerce')
+data['pitch'] = pd.to_numeric(data['pitch'], errors='coerce')
+data['flex'] = pd.to_numeric(data['flex'], errors='coerce')
+
+# Drop rows with missing values or time stamps
+data.dropna(subset=['roll', 'pitch', 'flex'], inplace=True)
+
+# Extracting roll, pitch, and flex
+features = data[['roll', 'pitch', 'flex']]  # Features
+labels = data['label']  # Labels
+
+# Normalizing the Features
+scaler = StandardScaler()
+features_normalized = scaler.fit_transform(features)
+
+# Adding noise to avoid overfitting
+noise_factor = 0.1  # Adjust the noise level
+features_noisy = features_normalized + noise_factor * np.random.normal(size=features_normalized.shape)
+
+# Split Data into Training and Testing Sets
+X_train, X_test, y_train, y_test = train_test_split(features_noisy, labels, test_size=0.3, random_state=42)
+
+# Building the Neural Network Model
+model = tf.keras.Sequential([
+    tf.keras.layers.Dense(64, activation='relu', input_shape=(X_train.shape[1],)),  # Input layer
+    tf.keras.layers.Dense(32, activation='relu'),  # Hidden layer
+    tf.keras.layers.Dense(1, activation='sigmoid')  # Output layer (binary classification)
+])
+
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+
+# Training the Model
+history = model.fit(X_train, y_train, epochs=600, batch_size=32, validation_data=(X_test, y_test))
+
+# Evaluate the Model
+test_loss, test_accuracy = model.evaluate(X_test, y_test)
+print(f"Test Accuracy with Noise: {test_accuracy * 100:.2f}%")
+
+# Predictions
+y_pred = model.predict(X_test)
+y_pred = (y_pred > 0.5).astype('int32')
+
+# Print the confusion matrix
+cm = confusion_matrix(y_test, y_pred)
+print("Confusion Matrix with Noise:")
+print(cm)
+
+# Print the classification report
+print("\nClassification Report with Noise:")
+print(classification_report(y_test, y_pred))
+
+# Plot the confusion matrix
+plt.figure(figsize=(6, 5))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['Incorrect', 'Correct'], yticklabels=['Incorrect', 'Correct'])
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.title('Confusion Matrix')
+plt.show()
+
+# Plot Accuracy and Loss Curves
+epochs = range(1, len(history.history['accuracy']) + 1)
+
+plt.figure(figsize=(12, 5))
+
+# Accuracy Plot
+plt.subplot(1, 2, 1)
+plt.plot(epochs, history.history['accuracy'], 'g-', label='Training Accuracy')
+plt.plot(epochs, history.history['val_accuracy'], 'b-', label='Validation Accuracy')
+plt.title('Training and Validation Accuracy', fontsize=20)
+plt.xlabel('Epochs', fontsize=16)
+plt.ylabel('Accuracy', fontsize=16)
+plt.legend(fontsize=14)
+plt.grid(True)
+
+# Loss Plot
+plt.subplot(1, 2, 2)
+plt.plot(epochs, history.history['loss'], 'g-', label='Training Loss')
+plt.plot(epochs, history.history['val_loss'], 'b-', label='Validation Loss')
+plt.title('Training and Validation Loss', fontsize=20)
+plt.xlabel('Epochs', fontsize=16)
+plt.ylabel('Loss', fontsize=16)
+plt.legend(fontsize=14)
+plt.grid(True)
+
+plt.tight_layout()
+plt.show()
+
+# Optional: Save the trained model
+model.save('breastfeeding_model.h5')
