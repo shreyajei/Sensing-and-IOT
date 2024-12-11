@@ -1,0 +1,53 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custom 3D Model Viewer</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <!-- Include Three.js Library -->
+  <script type="module" src="https://cdn.skypack.dev/three@0.129.0/build/three.module.js"></script>
+  <script type="module" src="https://cdn.skypack.dev/three@0.129.0/examples/jsm/loaders/GLTFLoader.js"></script>
+</head>
+
+<body>
+  <header class="topnav">
+    <img src="logo.png" alt="Logo" class="logo"> 
+  </header>
+
+  <main class="content">
+    <!-- Data Cards Section -->
+    <div class="cards">
+      <div class="card">
+        <p class="card-title">GYROSCOPE</p>
+        <p><span class="reading">X: <span id="gyroX"></span> rad</span></p>
+        <p><span class="reading">Y: <span id="gyroY"></span> rad</span></p>
+        <p><span class="reading">Z: <span id="gyroZ"></span> rad</span></p>
+      </div>
+      <div class="card">
+        <p class="card-title">ACCELEROMETER</p>
+        <p><span class="reading">X: <span id="accX"></span> ms<sup>2</sup></span></p>
+        <p><span class="reading">Y: <span id="accY"></span> ms<sup>2</sup></span></p>
+        <p><span class="reading">Z: <span id="accZ"></span> ms<sup>2</sup></span></p>
+      </div>
+    
+    </div>
+
+    <!-- 3D Model Viewer Container -->
+    <div class="model-and-image">
+      <div class="image-side">
+        <p class="diagram-text">Activate nipple Sensor</p>
+        <img src="chin_detect.png" alt="Side Image" class="side-image">
+      </div>
+      <!-- 3D Model Section -->
+      <div class="cube-content">
+        <div id="3Dcube"></div>
+      </div>
+      
+    </div>
+  </main>
+
+  <!-- Script to Handle 3D Model and Data Interaction -->
+  <script type="module" src="script.js"></script>
+</body>
+</html>
