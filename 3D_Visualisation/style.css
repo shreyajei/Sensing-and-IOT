@@ -1,4 +1,4 @@
-/* General Styles */
+/* 50% AI generated, 50% self */
 html {
   font-family: Arial, sans-serif;
   margin: 0;
@@ -19,28 +19,28 @@ body {
   background-color: #96A9F6;
   color: #FEFCFB;
   font-size: 1rem;
-  height: 100px; /* Adjust the height of the header */
+  height: 100px; 
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 10px; /* Space between logo and text */
+  gap: 10px; 
 }
 
 .logo {
-  height: 80px; /* Adjust logo size */
+  height: 80px;
   width: auto;
 }
 
 /* Main Content Styles */
 .content {
   padding: 20px;
-  flex: 1; /* Take up remaining space */
+  flex: 1;
 }
 
 /* Cards Section */
 .cards {
   display: flex;
-  gap: 20px; /* Space between cards */
+  gap: 20px; 
   justify-content: center;
   margin-bottom: 20px;
 }
@@ -50,7 +50,7 @@ body {
   background-color: #f0f0f0;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  width: 200px; /* Adjust card width */
+  width: 200px; 
   text-align: center;
 }
 
@@ -68,26 +68,26 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 0px; /* Space between the image and 3D model */
-  flex-wrap: wrap; /* Makes sure it stacks on small screens */
+  gap: 0px; 
+  flex-wrap: wrap; 
 }
 
 .cube-content {
-  width: 60%; /* Adjust width for the 3D cube container */
-  height: 400px; /* Set height for 3D viewer */
+  width: 60%; 
+  height: 400px;
   background-color: #fff;
   margin: auto;
 }
 
 .image-side {
-  width: 35%; /* Space for the image */
+  width: 35%; 
   padding-top: 20px;
 }
 
 .side-image {
   margin-left: 50px; 
-  width: 100%; /* Image takes full width of its container */
-  object-fit: cover; /* Ensures image covers the container while maintaining aspect ratio */
+  width: 100%; 
+  object-fit: cover; 
 }
 
 /* Reset Button Styles */
@@ -111,29 +111,29 @@ body {
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
   .cards {
-    flex-direction: column; /* Stack the cards vertically */
+    flex-direction: column;
   }
 
   .model-and-image {
-    flex-direction: column; /* Stack the model and image vertically */
+    flex-direction: column; 
     align-items: center;
   }
 
   .cube-content {
-    width: 80%; /* More width for 3D model on small screens */
+    width: 80%; 
     height: 300px;
   }
 
   .image-side {
-    width: 80%; /* Image takes more space on small screens */
+    width: 80%;
   }
   .diagram-text {
     margin-left: 50px; 
-    font-size: 4rem; /* Adjust font size */
-    text-align: center; /* Center the text */
-    margin-bottom: 10px; /* Space between text and image */
+    font-size: 4rem;
+    text-align: center;
+    margin-bottom: 10px; 
     font-weight: bold;
-    color: #333; /* Text color */
+    color: #333;
   }
   
 }
