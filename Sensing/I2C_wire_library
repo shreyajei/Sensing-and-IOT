@@ -1,0 +1,163 @@
+# tutorial: https://wokwi.com/projects/379258955593804801
+//importing wire library
+#include <Wire.h>
+
+#define SAMPLING_FREQ_HZ    100                       // sampling frequency (Hz)
+#define SAMPLING_PERIOD_MS  1000 / SAMPLING_FREQ_HZ   // sampling period (ms) 10 ms between samples
+#define NUM_SAMPLES         400                    // 100 samples at 100 Hz (4s total) 
+
+//declaring all variables
+const int MPU = 0x68; // MPU6050 I2C address
+float AccX, AccY, AccZ;
+float GyroX, GyroY, GyroZ;
+float accAngleX, accAngleY, gyroAngleX, gyroAngleY, gyroAngleZ;
+float roll, pitch, yaw;
+float AccErrorX, AccErrorY, GyroErrorX, GyroErrorY, GyroErrorZ;
+float elapsedTime, currentTime, previousTime;
+int c = 0;
+int error_number = 500; 
+unsigned long initial_timestamp;
+unsigned long final_timestamp;
+unsigned long timestamp = 0;
+const int flexPin = 33; //analog input
+float flex; 
+
+// intiating communication with MPU6050
+void setup() {
+  Serial.begin(115200);
+  Wire.begin();                      
+  Wire.beginTransmission(MPU);      
+  Wire.write(0x6B);                  
+  Wire.write(0x00);                  
+  Wire.endTransmission(true);        
+  
+  // Configure Accelerometer and gyro sensitivity
+  Wire.beginTransmission(MPU);
+  Wire.write(0x1C);                  
+  Wire.write(0x10);                  
+  Wire.endTransmission(true);
+  Wire.beginTransmission(MPU);
+  Wire.write(0x1B);                   
+  Wire.write(0x10);                   
+  Wire.endTransmission(true);
+  delay(20);
+}
+
+void loop() {
+  Serial.println("timestamp,roll,pitch,yaw,flex");
+
+  for (int i = 0; i < NUM_SAMPLES; i++) {
+    timestamp = millis();
+    IMU_calculations();
+    flex_sensor();
+    data_output();
+
+    while (millis() < timestamp + SAMPLING_PERIOD_MS);
+  }
+  Serial.println();
+}
+
+//error calcultions
+void IMU_error() {
+  // Read accelerometer values 500 times
+  while (c < error_number) {
+    Wire.beginTransmission(MPU);
+    Wire.write(0x3B);
+    Wire.endTransmission(false);
+    Wire.requestFrom(MPU, 6, true);
+    AccX = (Wire.read() << 8 | Wire.read()) / 16384.0 ;
+    AccY = (Wire.read() << 8 | Wire.read()) / 16384.0 ;
+    AccZ = (Wire.read() << 8 | Wire.read()) / 16384.0 ;
+    // Sum all readings
+    AccErrorX = AccErrorX + ((atan((AccY) / sqrt(pow((AccX), 2) + pow((AccZ), 2))) * 180 / PI));
+    AccErrorY = AccErrorY + ((atan(-1 * (AccX) / sqrt(pow((AccY), 2) + pow((AccZ), 2))) * 180 / PI));
+    c++;
+  }
+
+  //Divide the sum by 500 to get the error value
+  AccErrorX = AccErrorX / error_number;
+  AccErrorY = AccErrorY / error_number;
+  c = 0;
+  // Read gyro values 500 times
+  while (c < error_number) {
+    Wire.beginTransmission(MPU);
+    Wire.write(0x43);
+    Wire.endTransmission(false);
+    Wire.requestFrom(MPU, 6, true);
+    GyroX = Wire.read() << 8 | Wire.read();
+    GyroY = Wire.read() << 8 | Wire.read();
+    GyroZ = Wire.read() << 8 | Wire.read();
+    // Sum all readings
+    GyroErrorX = GyroErrorX + (GyroX / 131.0);
+    GyroErrorY = GyroErrorY + (GyroY / 131.0);
+    GyroErrorZ = GyroErrorZ + (GyroZ / 131.0);
+    c++;
+  }
+  //Divide the sum by 500 to get the error value
+  GyroErrorX = GyroErrorX / error_number;
+  GyroErrorY = GyroErrorY / error_number;
+  GyroErrorZ = GyroErrorZ / error_number;
+  
+}
+
+// IMU function
+void IMU_calculations () {
+  //read acceleromter data 
+  Wire.beginTransmission(MPU);
+  Wire.write(0x3B); 
+  Wire.endTransmission(false);
+  Wire.requestFrom(MPU, 6, true); 
+
+  //For a range of +-2g, we need to divide the raw values by 16384, according to the datasheet
+  AccX = (Wire.read() << 8 | Wire.read()) / 16384.0; // X-axis value
+  AccY = (Wire.read() << 8 | Wire.read()) / 16384.0; // Y-axis value
+  AccZ = (Wire.read() << 8 | Wire.read()) / 16384.0; // Z-axis value
+  // Calculating roll and pitch from the accelerometer data
+  accAngleX = (atan(AccY / sqrt(pow(AccX, 2) + pow(AccZ, 2))) * 180 / PI) - AccErrorX; 
+  accAngleY = (atan(-1 * AccX / sqrt(pow(AccY, 2) + pow(AccZ, 2))) * 180 / PI) - AccErrorY; 
+
+  //read gyro data
+  previousTime = currentTime;        // Previous time is stored before the actual time read
+  currentTime = millis();            // Current time actual time read
+  elapsedTime = (currentTime - previousTime) / 1000; 
+  Wire.beginTransmission(MPU);
+  Wire.write(0x43); 
+  Wire.endTransmission(false);
+  Wire.requestFrom(MPU, 6, true); 
+  GyroX = (Wire.read() << 8 | Wire.read()) / 131.0; // for a 250deg/s range we have to divide first the raw value by 131.0, according to the datasheet
+  GyroY = (Wire.read() << 8 | Wire.read()) / 131.0;
+  GyroZ = (Wire.read() << 8 | Wire.read()) / 131.0;
+  // output correction using erro vlaues
+  GyroX = GyroX- GyroErrorX; 
+  GyroY = GyroY - GyroErrorY; 
+  GyroZ = GyroZ - GyroErrorZ;
+  // multiply by sendonds to get the angle in degrees
+  gyroAngleX = gyroAngleX + GyroX * elapsedTime; 
+  gyroAngleY = gyroAngleY + GyroY * elapsedTime;
+  yaw =  yaw + GyroZ * elapsedTime;
+  // Complementary filter - combine acceleromter and gyro angle values
+  gyroAngleX = 0.90 * gyroAngleX + 0.1  * accAngleX;
+  gyroAngleY = 0.90 * gyroAngleY + 0.1 * accAngleY;
+
+  roll = gyroAngleX;
+  pitch = gyroAngleY;
+}
+
+void flex_sensor (){
+  flex = analogRead(flexPin);               
+  flex = map(flex, 0, 1023, 0, 100); // mapping flex sensor value
+}
+
+void data_output () { 
+  // Print values on the serial monitor
+  Serial.print(timestamp);
+  Serial.print(",");
+  Serial.print(roll);
+  Serial.print(",");
+  Serial.print(pitch);
+  Serial.print(",");
+  Serial.print(yaw);
+  Serial.print(",");
+  Serial.print(flex); 
+  Serial.println(); 
+}
