@@ -6,12 +6,12 @@ import joblib
 import time
 import os
 
-# Debug: Print current working directory and check files
+
 print("Current Working Directory:", os.getcwd())
 print("Contents of current directory:", os.listdir())
 
 # Configuration
-SERIAL_PORT = 'COM6'  # Change this to match your Arduino's serial port
+SERIAL_PORT = 'COM6' 
 BAUD_RATE = 115200
 
 # Load Model and Scaler
