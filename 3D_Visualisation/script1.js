@@ -43,7 +43,7 @@ function init3D() {
     model1.position.set(-20, 0, 0);
     model1.traverse((node) => {
       if (node.isMesh) {
-        node.material.color.set(0xffdbac); // Orange color for scaledbreast model
+        node.material.color.set(0xffdbac); 
       }
     });
 
@@ -61,9 +61,9 @@ function init3D() {
     model.rotation.x = Math.PI / 2; // 90 degrees in radians
     model.traverse((node) => {
       if (node.isMesh) {
-        node.material.color.set(0xffdbac); // Orange color for scaledbreast model
+        node.material.color.set(0xffdbac); 
         node.material.transparent = true;
-        node.material.opacity = 0.5; // Adjust for desired transparency
+        node.material.opacity = 0.5; // transparency
       }
     });
 
