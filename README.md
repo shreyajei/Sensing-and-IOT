@@ -12,5 +12,5 @@ Mamilla: An educational breastfeeding device; Shreya Jei; CID: 02080949
 Youtube: https://youtu.be/MW54fRmQBdU
 
 # Presentation slides 
-Figma Link: https://www.figma.com/deck/pNjqr4ui2RfIOCWaPOmQIQ/Untitled?node-id=9-184&node-type=slide&viewport=-11587%2C-110%2C0.53&t=6DaPfxmxSMlZovzd-1&scaling=min-zoom&content-scaling=fixed&page-id=0%3A1 
-PDF: https://acrobat.adobe.com/id/urn:aaid:sc:US:324ca242-23a3-4de0-a16c-8907771b9b79
+1. Live Figma Link: https://www.figma.com/deck/pNjqr4ui2RfIOCWaPOmQIQ/Untitled?node-id=9-184&node-type=slide&viewport=-11587%2C-110%2C0.53&t=6DaPfxmxSMlZovzd-1&scaling=min-zoom&content-scaling=fixed&page-id=0%3A1 
+2. PDF: https://acrobat.adobe.com/id/urn:aaid:sc:US:324ca242-23a3-4de0-a16c-8907771b9b79
