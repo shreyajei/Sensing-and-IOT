@@ -1,6 +1,7 @@
 # Sensing_IoT_Project
 Mamilla: An educational breastfeeding device
-Shreya Jei; CID: 02080949
+Shreya Jei
+CID: 02080949
 
 # Structure 
 1. Sensing: Arduino files (MPU 6050, flex sensor,)
