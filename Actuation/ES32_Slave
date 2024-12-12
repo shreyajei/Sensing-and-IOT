@@ -1,0 +1,111 @@
+#include <Wire.h>
+
+#define SAMPLING_FREQ_HZ    100
+#define SAMPLING_PERIOD_MS  (1000 / SAMPLING_FREQ_HZ)
+#define NUM_SAMPLES         100
+#define LED_PIN             5
+
+const int MPU = 0x68;
+float AccX, AccY, AccZ;
+float GyroX, GyroY, GyroZ;
+float accAngleX, accAngleY, gyroAngleX, gyroAngleY, gyroAngleZ;
+float roll, pitch, yaw;
+float elapsedTime, currentTime, previousTime;
+int flexPin = 33;
+float flex;
+
+void setup() {
+    pinMode(LED_PIN, OUTPUT);
+    Serial.begin(115200);
+    Wire.begin();
+    Wire.beginTransmission(MPU);
+    Wire.write(0x6B);
+    Wire.write(0x00);
+    Wire.endTransmission(true);
+
+    Wire.beginTransmission(MPU);
+    Wire.write(0x1C);
+    Wire.write(0x10);
+    Wire.endTransmission(true);
+
+    Wire.beginTransmission(MPU);
+    Wire.write(0x1B);
+    Wire.write(0x10);
+    Wire.endTransmission(true);
+    delay(20);
+}
+
+void loop() {
+    for (int i = 0; i < NUM_SAMPLES; i++) {
+        unsigned long timestamp = millis();
+        IMU_calculations();
+        flex_sensor();
+        Serial.print(timestamp);
+        Serial.print(",");
+        Serial.print(roll);
+        Serial.print(",");
+        Serial.print(pitch);
+        Serial.print(",");
+        Serial.print(yaw);
+        Serial.print(",");
+        Serial.print(flex);
+        Serial.println();
+
+        checkLEDControl();
+        while (millis() < timestamp + SAMPLING_PERIOD_MS);
+    }
+}
+
+void checkLEDControl() {
+    if (Serial.available() > 0) {
+        char command = Serial.read();
+        if (command == '1') {
+            analogWrite(LED_PIN, 255); // Full brightness for correct position
+        } else if (command == '0') {
+            analogWrite(LED_PIN, 50); // Dim LED for incorrect position
+            analogWrite(LED_PIN, 0); // Dim LED for incorrect position
+        }
+    }
+}
+
+void IMU_calculations() {
+    Wire.beginTransmission(MPU);
+    Wire.write(0x3B);
+    Wire.endTransmission(false);
+    Wire.requestFrom(MPU, 6, true);
+
+    AccX = (Wire.read() << 8 | Wire.read()) / 16384.0;
+    AccY = (Wire.read() << 8 | Wire.read()) / 16384.0;
+    AccZ = (Wire.read() << 8 | Wire.read()) / 16384.0;
+
+    accAngleX = (atan(AccY / sqrt(pow(AccX, 2) + pow(AccZ, 2))) * 180 / PI);
+    accAngleY = (atan(-1 * AccX / sqrt(pow(AccY, 2) + pow(AccZ, 2))) * 180 / PI);
+
+    previousTime = currentTime;
+    currentTime = millis();
+    elapsedTime = (currentTime - previousTime) / 1000;
+
+    Wire.beginTransmission(MPU);
+    Wire.write(0x43);
+    Wire.endTransmission(false);
+    Wire.requestFrom(MPU, 6, true);
+
+    GyroX = (Wire.read() << 8 | Wire.read()) / 131.0;
+    GyroY = (Wire.read() << 8 | Wire.read()) / 131.0;
+    GyroZ = (Wire.read() << 8 | Wire.read()) / 131.0;
+
+    gyroAngleX += GyroX * elapsedTime;
+    gyroAngleY += GyroY * elapsedTime;
+    yaw += GyroZ * elapsedTime;
+
+    gyroAngleX = 0.90 * gyroAngleX + 0.1 * accAngleX;
+    gyroAngleY = 0.90 * gyroAngleY + 0.1 * accAngleY;
+
+    roll = gyroAngleX;
+    pitch = gyroAngleY;
+}
+
+void flex_sensor() {
+    flex = analogRead(flexPin);
+    flex = map(flex, 0, 1023, 0, 100);
+}
