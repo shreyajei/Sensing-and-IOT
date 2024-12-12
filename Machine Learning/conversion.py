@@ -1,3 +1,4 @@
+#90% AI generated, 10% self generated
 with open('breastfeeding_model.h5', 'w') as header_file:
     header_file.write("const unsigned char model[] = {\n")
     with open("model.tflite", "rb") as tflite_file:
